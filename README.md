@@ -89,7 +89,7 @@ mydata <- parse_command_line(args)
 
 `mydata` is a list in which each entry corresponds to a registered argument. Commands and subcommands are stored in `mydata$command` and `mydata$subcmd` respectively. Unrecognized arguments are stored in `mydata$unknowns`.
 
-```
+``` r
 # get values as mydata$<variable_name>, eg: 
 writeLines ("\nAfter parse_command_line()...")
 writeLines (paste("debug mode:",debug))
