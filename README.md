@@ -18,9 +18,9 @@ When registering arguments, you must indicate the type of value you expect to re
 
 `argsType$TypeCount` allows for parameters whose value increments each time the argument is used. Thus `-v -v -v` would return a value of 3. Short parameters can be combined, so `-vvv` is equivalent to `-v -v -v`.
 
-`argsType$TypePositional` is a required argument in the last position, such as the name of a file to operate upon; multiple `argsType$TypePositional` arguments can be supplied and will be filled (from left-to-right) in the order supplied to `reg_argument`.
+"Positional" arguments are supported using `reg_positionals_list()`. Multiple positional arguments can be supplied and will be filled (from left-to-right) in the order given in the call to `reg_positionals_list()`.
 
-If `argsType$TypeBool` is used, using the argument flips the default Boolean value. So for instance, if you call `reg_argument-list(c("--plot","-p","plot",FALSE,argsType$TypeBool,'plot output'))`, the default value of `plot` is `FALSE`. If `--plot` (or `-p`) is included in the argument list, `plot` will be set to `TRUE`. Arguments of the form `--plot=TRUE` are also allowed.
+If `argsType$TypeBool` is used, using the argument flips the default Boolean value. So for instance, if you call `reg_argument_list(c("--plot","-p","plot",FALSE,argsType$TypeBool,'plot output'))`, the default value of `plot` is `FALSE`. If `--plot` (or `-p`) is included in the argument list, `plot` will be set to `TRUE`. Arguments of the form `--plot=TRUE` are also allowed.
 
 ## Installation
 
@@ -80,6 +80,11 @@ subcmds <- list(
   c("bankfee", "withdraw", "add a bank fee")
 )
 reg_subcmd_list(subcmds)
+
+pos <- list(
+  c("content",NA,"Content to scrape: archive type (e.g., 'technology-feature:1:3'), article URL or CSV")
+)
+reg_positionals_list(pos)
 
 # get command line arguments from the system
 args <- commandArgs(trailingOnly = TRUE)
