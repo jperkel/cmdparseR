@@ -77,6 +77,12 @@ usage <- function() {
   }
   writeLines('')
 
+  # add a help argument if none provided
+  if ((!"--help" %in% args_table$lparam) && (!"-?" %in% args_table$sparam)) {
+    args_table <- rbind(args_table, data.frame(lparam="--help",sparam="-?",var="help",default=FALSE,
+                                               argType=argsType$TypeBool,help="Display help message"))
+  }
+
   # sort the tables alphabetically
   args_table <- args_table[order(args_table$lparam),]
   # args_table$scope <- ifelse(args_table$scope == "NA", NA, args_table$scope)
