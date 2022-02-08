@@ -116,6 +116,6 @@ writeLines (paste("file 1:", mydata$file1))
 writeLines (paste("file 2:", mydata$file2))
 ``` 
 
-`cmdparseR` provides a `usage()` function to create a formatted help message based on the `desc` strings passed to `reg_argument_list()`, `reg_command_list()` and `reg_subcmd_list()`. By default, `--help` or `-?` on the command line will call this function. `--ver` or `-V` prints out version information. 
+`cmdparseR` provides a `usage()` function to create a formatted help message based on the `desc` strings passed to `reg_argument_list()`, `reg_command_list()` and `reg_subcmd_list()`. By default, `--help` or `-?` on the command line will call this function. 
 
 
