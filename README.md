@@ -54,10 +54,10 @@ arguments <- list(
   c("--number","-n","cknum",NA,argsType$TypeValue,'specify check number'),
   
   # an example TypeMultiVal, where all supplied params are stored
-  list("--keyword","-k","keyword",NA,argsType$TypeMultiVal,'keyword search terms'),
+  c("--keyword","-k","keyword",NA,argsType$TypeMultiVal,'keyword search terms'),
   
   # an example TypeCount, where each use of the param increments a variable
-  list("--verbose","-v","verbose",0,argsType$TypeCount,'verbose level')
+  c("--verbose","-v","verbose",0,argsType$TypeCount,'verbose level')
 )
 reg_argument_list(arguments)
 
