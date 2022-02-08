@@ -27,11 +27,13 @@ pkg.globals <- new.env()
 #' TypeRange: splits a TypeValue like "1:3" into two variables, "1" and "3"
 #' TypePositional: required, final argument
 #'
-#' @export
+#'
 #'
 argsEnum <- function() {
   list (TypeBool = 1, TypeValue = 2, TypeMultiVal = 3, TypeCount = 4, TypeRange = 5, TypePositional = 6)
 }
+#' enum for different param types; access with argsType$<enum_element>
+#' @export
 argsType <- argsEnum()
 
 
@@ -151,7 +153,7 @@ init_command_line_parser <- function (script, desc, ver = NA) {
   pkg.globals$ver <- ver
   # tables to hold the possible command line params
   pkg.globals$args_table <- data.frame(lparam = NA, sparam = NA, var = NA, default = NA, argType = NA,
-                           help = NA, scope = NA, stringsAsFactors = FALSE)
+                           help = NA, stringsAsFactors = FALSE)
   pkg.globals$cmds_table <- data.frame(cmd = NA, help = NA, stringsAsFactors = FALSE)
   pkg.globals$subcmds_table <- data.frame(subcmd = NA, parent = NA, help = NA, stringsAsFactors = FALSE)
 
@@ -206,7 +208,7 @@ reg_command_list <- function(clist) {
   ids <- c("cmd","help")
   for (c in clist) {
     stopifnot(length(c) == length(ids))
-    reg_command(cmd = c[[1]], help = c[[2]])
+    reg_command(cmd = c[1], help = c[2])
   }
 } # reg_command_list
 
@@ -255,7 +257,7 @@ reg_subcmd_list <- function(slist) {
   ids <- c("subcmd","parent","help")
   for (s in slist) {
     stopifnot(length(s) == length(ids))
-    reg_subcmd(subcmd = s[[1]], parent = s[[2]], help = s[[3]])
+    reg_subcmd(subcmd = s[1], parent = s[2], help = s[3])
   }
 } # reg_subcmd_list
 
@@ -309,11 +311,11 @@ reg_argument <- function(lparam, sparam, var, default, argType, help) {
 #' reg_argument_list(arguments)
 reg_argument_list <- function(plist) {
   # scope is not required. So, check for the 6 required params, and if no scope provided, set to NA
-  ids <- c("lparam","sparam","var","default","argType","help")
+  # ids <- c("lparam","sparam","var","default","argType","help")
 
   for (p in plist) {
-    reg_argument (lparam = p[[1]], sparam = p[[2]], var = p[[3]], default = p[[4]],
-                  argType = p[[5]], help = p[[6]])
+    reg_argument (lparam = p[1], sparam = p[2], var = p[3], default = p[4],
+                  argType = p[5], help = p[6])
   }
 } # reg_argument_list
 
