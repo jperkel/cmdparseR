@@ -1,13 +1,13 @@
 Package: cmdparseR
-Title: What the Package Does (One Line, Title Case)
+Title: Command Line Parser
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Jeffrey",
+           family = "Perkel",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+           email = "jeffrey.perkel@nature.com",
+           comment = c(ORCID = "0000-0001-5699-1008"))
+Description: A generic command line argument parser.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
