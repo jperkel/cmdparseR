@@ -42,7 +42,6 @@ argsType <- argsEnum()
 #' @export
 #' @importFrom stringr str_pad
 #'
-#' @examples
 usage <- function() {
   # number of spaces for each indentation level
   lvl1_indent <- 2
@@ -80,7 +79,7 @@ usage <- function() {
 
   # sort the tables alphabetically
   args_table <- args_table[order(args_table$lparam),]
-  args_table$scope <- ifelse(args_table$scope == "NA", NA, args_table$scope)
+  # args_table$scope <- ifelse(args_table$scope == "NA", NA, args_table$scope)
 
   if (nrow(cmds_table) > 0) {
     cmds_table <- cmds_table[order(cmds_table$cmd),]
@@ -128,10 +127,10 @@ usage <- function() {
              paste0('\n', buffer_str(lvl2_indent + max(nchar(args_table$lparam)) + 10),
                     'default: ',
                     ifelse (myrow$argType == argsType$TypeBool, as.logical(myrow$default), myrow$default))
-      ),
-      ifelse(is.na(myrow$scope), '',
-             paste0('\n', buffer_str(lvl2_indent + max(nchar(args_table$lparam)) + 10),
-                    "Valid for: ", gsub('_', ', ', myrow$scope)))
+      ) #,
+      # ifelse(is.na(myrow$scope), '',
+      #        paste0('\n', buffer_str(lvl2_indent + max(nchar(args_table$lparam)) + 10),
+      #               "Valid for: ", gsub('_', ', ', myrow$scope)))
     ))
   }
 } # usage
@@ -311,9 +310,10 @@ reg_argument <- function(lparam, sparam, var, default, argType, help) {
 #' reg_argument_list(arguments)
 reg_argument_list <- function(plist) {
   # scope is not required. So, check for the 6 required params, and if no scope provided, set to NA
-  # ids <- c("lparam","sparam","var","default","argType","help")
+  ids <- c("lparam","sparam","var","default","argType","help")
 
   for (p in plist) {
+    stopifnot (length(p) == length(ids))
     reg_argument (lparam = p[1], sparam = p[2], var = p[3], default = p[4],
                   argType = p[5], help = p[6])
   }
@@ -327,14 +327,20 @@ reg_positionals <- function(var, default, help) {
 } # reg_positionals
 
 
-#
-# Register a list of 'positional' arguments
+#' Register a list of 'positional' arguments
+#'
+#' @param plist list of positional arguments: variable name, default value, help text
+#'
+#' @export
+#'
+#' @examples
+#' args <- list(c("infile",NA,"input file"))
 reg_positionals_list <- function(plist) {
   ids <- c("var","default","help")
 
   for (p in plist) {
     stopifnot(length(p) == length(ids))
-    reg_positionals(var = p[[1]], default = p[[2]], help = p[[3]])
+    reg_positionals(var = p[1], default = p[2], help = p[3])
   }
 } # reg_positionals_list
 
@@ -409,11 +415,11 @@ parse_date <- function(d) {
 #' @examples
 #' args <- commandArgs(trailingOnly = TRUE)
 #' mydata <- parse_command_line(args)
-#' # After parse_command_line()..."
-#' writeLines (paste("command:",mydata$command))
-#' writeLines (paste("subcommand:",mydata$subcmd))
-#' writeLines (paste("infile:", mydata$infile))
-#' writeLines (paste("outfile:",mydata$outfile))
+#' # After parse_command_line(), access values as mydata$<var_name>, eg
+#' # writeLines (paste("command:",mydata$command))
+#' # writeLines (paste("subcommand:",mydata$subcmd))
+#' # writeLines (paste("infile:", mydata$infile))
+#' # writeLines (paste("outfile:",mydata$outfile))
 parse_command_line <- function(args) {
   # remove the first line of the tables, which are all NA
   args_table <- pkg.globals$args_table[-1,]
@@ -455,7 +461,7 @@ parse_command_line <- function(args) {
     index <- sort(which(args_table$argType == argsType$TypePositional), decreasing = TRUE)
     if (length(args) == 0 || length(args) < length(index)) {
       usage()
-      writeLines(paste0("new_parse_command_line(): one or more positional arguments missing"))
+      writeLines(paste0("parse_command_line(): one or more positional arguments missing"))
       stop(call. = FALSE)
     }
     for (i in index) {
@@ -476,11 +482,11 @@ parse_command_line <- function(args) {
     }
 
     else if (is.na(args[i])) {
-      stop("new_parse_command_line(): command required", call. = FALSE)
+      stop("parse_command_line(): command required", call. = FALSE)
     }
 
     else {
-      stop (paste("new_parse_command_line(): unknown command:", args[i]), call. = FALSE)
+      stop (paste("parse_command_line(): unknown command:", args[i]), call. = FALSE)
     }
     i <- i + 1
   }
@@ -491,10 +497,10 @@ parse_command_line <- function(args) {
       mydata[["subcmd"]] <- args[i]
     }
     else if (is.na(args[i])) {
-      stop("new_parse_command_line(): subcommand required", call. = FALSE)
+      stop("parse_command_line(): subcommand required", call. = FALSE)
     }
     else {
-      stop (paste0("new_parse_command_line(): \'", args[i], "\' is not a subcommand of parent \'",
+      stop (paste0("parse_command_line(): \'", args[i], "\' is not a subcommand of parent \'",
                    mydata$command, "\'"), call. = FALSE)
     }
     i <- i + 1
@@ -520,7 +526,7 @@ parse_command_line <- function(args) {
         # unrecognized argument
         unk <- unk + 1
         mydata[["unknowns"]][unk] <- p
-        writeLines (paste("Warning: new_parse_command_line(): unknown param:", p))
+        writeLines (paste("Warning: parse_command_line(): unknown param:", p))
         i <- i + 1
         next
       }
@@ -533,7 +539,7 @@ parse_command_line <- function(args) {
       # unrecognized argument
       unk <- unk + 1
       mydata[["unknowns"]][unk] <- p
-      writeLines (paste("Warning: new_parse_command_line(): unknown param:", p))
+      writeLines (paste("Warning: parse_command_line(): unknown param:", p))
       i <- i + 1
       next
     }
@@ -552,7 +558,7 @@ parse_command_line <- function(args) {
     else if (myrow$argType %in% c(argsType$TypeValue, argsType$TypeMultiVal, argsType$TypeRange)) {
       if (!has_equals) {
         if (i == length(args)) { # ie, there is no args[i+1]
-          stop(paste("new_parse_command_line(): Expected value missing after param:", p), call. = FALSE)
+          stop(paste("parse_command_line(): Expected value missing after param:", p), call. = FALSE)
         }
         if (myrow$argType == argsType$TypeValue) {
           mydata[[myrow$var]] <- args[i+1]

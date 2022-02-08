@@ -18,9 +18,9 @@ Parse the command line
 \examples{
 args <- commandArgs(trailingOnly = TRUE)
 mydata <- parse_command_line(args)
-# After parse_command_line()..."
-writeLines (paste("command:",mydata$command))
-writeLines (paste("subcommand:",mydata$subcmd))
-writeLines (paste("infile:", mydata$infile))
-writeLines (paste("outfile:",mydata$outfile))
+# After parse_command_line(), access values as mydata$<var_name>, eg
+# writeLines (paste("command:",mydata$command))
+# writeLines (paste("subcommand:",mydata$subcmd))
+# writeLines (paste("infile:", mydata$infile))
+# writeLines (paste("outfile:",mydata$outfile))
 }
