@@ -18,7 +18,7 @@ When registering arguments, you must indicate the type of value you expect to re
 
 `argsType$TypeCount` allows for parameters whose value increments each time the argument is used. Thus `-v -v -v` would return a value of 3. Short parameters can be combined, so `-vvv` is equivalent to `-v -v -v`.
 
-"Positional" arguments are supported using `reg_positionals_list()`. Multiple positional arguments can be supplied and will be filled (from left-to-right) in the order given in the call to `reg_positionals_list()`.
+"Positional" arguments -- i.e., required arguments at the far right of the command line -- are supported using `reg_positionals_list()`. Multiple positional arguments can be supplied; they will be filled (from left-to-right) in the order given in the call to `reg_positionals_list()`.
 
 If `argsType$TypeBool` is used, using the argument flips the default Boolean value. So for instance, if you call `reg_argument_list(c("--plot","-p","plot",FALSE,argsType$TypeBool,'plot output'))`, the default value of `plot` is `FALSE`. If `--plot` (or `-p`) is included in the argument list, `plot` will be set to `TRUE`. Arguments of the form `--plot=TRUE` are also allowed.
 
@@ -40,13 +40,14 @@ library(cmdparseR)
 
 init_command_line_parser('MyCheckbook.R','My checkbook program', '1.0.0')
 
-# register arguments
+# register arguments as a list of vectors: --lparam, -sparam, variable_name, 
+#   default_value, type, help message
 arguments <- list(
   # example TypeBool argument. Use as '--lparam' or '-sparam'
   c("--debug","-x","debug",FALSE,argsType$TypeBool,'print debug messages'),
   
   # example TypeValue arguments. Use as '--lparam=val', '--lparam val', or '-l val'
-  c("--infile","-i","infile",NA,argsType$TypeValue,'location of your checkbook file'),
+  c("--archive","-r","archive",NA,argsType$TypeValue,'location of your backup file'),
   c("--date","-d","date",NA,argsType$TypeValue,'specify date'),
   c("--msg","-m","msg",NA,argsType$TypeValue,'memo line message'),
   c("--amount","-a","amount",NA,argsType$TypeValue,'specify dollar amount'),
@@ -61,7 +62,7 @@ arguments <- list(
 )
 reg_argument_list(arguments)
 
-# register commands
+# register commands: command, help text
 cmds <- list(
   c("withdraw", "add a withdrawal"),
   c("plot", "graph output"),
@@ -71,7 +72,7 @@ cmds <- list(
 )
 reg_command_list(cmds)
 
-# register subcommands
+# register subcommands: subcommand, parent command to which it applies, help text
 subcmds <- list(
   c("cash", "withdraw", "add a cash withdrawal")
   c("check", "withdraw", "add a check withdrawal")
@@ -81,8 +82,10 @@ subcmds <- list(
 )
 reg_subcmd_list(subcmds)
 
+# register positional arguments: variable name, default value, help text
 pos <- list(
-  c("content",NA,"Content to scrape: archive type (e.g., 'technology-feature:1:3'), article URL or CSV")
+  c("file1",NA,"file 1"),
+  c("file2",NA,"file 2")
 )
 reg_positionals_list(pos)
 
@@ -92,7 +95,7 @@ args <- commandArgs(trailingOnly = TRUE)
 mydata <- parse_command_line(args)
 ```
 
-`mydata` is a list in which each entry corresponds to a registered argument. Commands and subcommands are stored in `mydata$command` and `mydata$subcmd` respectively. Unrecognized arguments are stored in `mydata$unknowns`.
+`mydata` is a list in which each entry is named according to the variable name (i.e., the third element) passed to `reg_argument_list()`. Commands and subcommands are stored in `mydata$command` and `mydata$subcmd` respectively. Unrecognized arguments are stored in `mydata$unknowns`.
 
 ``` r
 # get values as mydata$<variable_name>, eg: 
@@ -100,7 +103,7 @@ writeLines ("\nAfter parse_command_line()...")
 writeLines (paste("debug mode:",debug))
 writeLines (paste("command:",mydata$command))
 writeLines (paste("subcommand:",mydata$subcmd))
-writeLines (paste("infile:", mydata$infile))
+writeLines (paste("archive:", mydata$archive))
 writeLines (paste("date:",mydata$date))
 writeLines (paste("msg:",mydata$msg))
 writeLines (paste("amount:",mydata$amount))
@@ -109,6 +112,8 @@ writeLines (paste("cknum:",mydata$cknum))
 writeLines (paste("keywords:",mydata$keyword))
 writeLines (paste("unknowns:",mydata$unknowns))
 writeLines (paste("verbose level:", mydata$verbose))
+writeLines (paste("file 1:", mydata$file1))
+writeLines (paste("file 2:", mydata$file2))
 ``` 
 
 `cmdparseR` provides a `usage()` function to create a formatted help message based on the `desc` strings passed to `reg_argument_list()`, `reg_command_list()` and `reg_subcmd_list()`. By default, `--help` or `-?` on the command line will call this function. `--ver` or `-V` prints out version information. 
