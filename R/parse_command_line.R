@@ -16,7 +16,6 @@
 
 pkg.globals <- new.env()
 
-#
 #' Define an enum for different modes; access with argsType$<enum_element>
 #' ht https://stackoverflow.com/questions/33838392/enum-like-arguments-in-r
 #'
@@ -26,7 +25,6 @@ pkg.globals <- new.env()
 #' TypeCount: value increments each time the param is used. eg, -v -v yields 2
 #' TypeRange: splits a TypeValue like "1:3" into two variables, "1" and "3"
 #' TypePositional: required, final argument
-#'
 #'
 #'
 argsEnum <- function() {
@@ -76,12 +74,6 @@ usage <- function() {
     writeLines(paste0(buffer_str(lvl2_indent), 'Ver: ', pkg.globals$ver))
   }
   writeLines('')
-
-  # # add a help argument if none provided
-  # if ((!"--help" %in% args_table$lparam) && (!"-?" %in% args_table$sparam)) {
-  #   args_table <- rbind(args_table, data.frame(lparam="--help",sparam="-?",var="help",default=FALSE,
-  #                                              argType=argsType$TypeBool,help="Display help message"))
-  # }
 
   # sort the tables alphabetically
   args_table <- args_table[order(args_table$lparam),]
@@ -157,7 +149,7 @@ init_command_line_parser <- function (script, desc, ver = NA) {
   pkg.globals$desc_str <- desc
   pkg.globals$ver <- ver
   # tables to hold the possible command line params
-  pkg.globals$args_table <- data.frame(lparam = c(NA,'--help'), sparam = c(NA,'-?'), var = c(NA,NA),
+  pkg.globals$args_table <- data.frame(lparam = c(NA,'--help'), sparam = c(NA,'-?'), var = c(NA,'help'),
                                        default = c(NA,FALSE), argType = c(NA,argsType$TypeBool),
                                        help = c(NA,"Display help message"), stringsAsFactors = FALSE)
   pkg.globals$cmds_table <- data.frame(cmd = NA, help = NA, stringsAsFactors = FALSE)
@@ -190,11 +182,6 @@ reg_command <- function(cmd, help = '') {
 } # reg_command
 
 
-##
-## register commands using a list, eg:
-## cmds <- list (list("cmd1", "help1"), list("cmd2", "help2"))
-## reg_command_list (cmds)
-##
 #' Register commands using a list
 #'
 #' @param clist list of commands
@@ -352,9 +339,6 @@ reg_positionals_list <- function(plist) {
 } # reg_positionals_list
 
 
-##
-##
-##
 #' Parses a date in YYYY-MM-DD, YYYYMMDD, YYYY-MM or YYYY format
 #'
 #' @param d the date to parse (string)
@@ -432,6 +416,8 @@ parse_command_line <- function(args) {
   args_table <- pkg.globals$args_table[-1,]
   cmds_table <- pkg.globals$cmds_table[-1,]
   subcmds_table <- pkg.globals$subcmds_table[-1,]
+  # placeholder for positional args, if any
+  positionals <- NA
 
   # if neither reg_arguments() nor reg_command() has been called, there's no table to process;
   # return the args as a list under the name 'unknowns'
@@ -462,24 +448,10 @@ parse_command_line <- function(args) {
     mydata[[name]] <- args_table$default[args_table$var == name]
   }
 
-  # process required args (TypePositional). args are processed in the order they are called.
-  if (any(args_table$argType == argsType$TypePositional)) {
-    # reverse-sort so variables are loaded in the order called
-    index <- sort(which(args_table$argType == argsType$TypePositional), decreasing = TRUE)
-    if (length(args) == 0 || length(args) < length(index)) {
-      usage()
-      writeLines(paste0("parse_command_line(): one or more positional arguments missing"))
-      stop(call. = FALSE)
-    }
-    for (i in index) {
-      myrow <- args_table[i,]
-      mydata[[myrow$var]] <- args[length(args)]
-      args <- args[1:length(args)-1]
-    }
-  }
+  # counter
+  i <- 1
 
   # process commands if any
-  i <- 1
   if (nrow(cmds_table) > 0) {
     if (args[i] %in% cmds_table$cmd) {
       mydata[["command"]] <- args[i]
@@ -520,6 +492,7 @@ parse_command_line <- function(args) {
     myrow <- NULL
     index <- NULL
     has_equals <- FALSE
+    # print(paste(i, p))
 
     if (is_lparam(p)) {
       if (p %in% args_table$lparam) {
@@ -538,10 +511,30 @@ parse_command_line <- function(args) {
         next
       }
     }
-    else if (is_sparam(p) && p %in% args_table$sparam) {
-      index <- which(args_table$sparam == p)
+    else if (is_sparam(p)) {
+      if (p %in% args_table$sparam) index <- which(args_table$sparam == p)
+      else {
+        # unrecognized argument
+        unk <- unk + 1
+        mydata[["unknowns"]][unk] <- p
+        writeLines (paste("Warning: parse_command_line(): unknown param:", p))
+        i <- i + 1
+        next
+      }
     }
-
+    else if (any(args_table$argType == argsType$TypePositional)) {
+      # possible positional argument
+      # if none of the following args start w/ '^-', assume all are positionals
+      if (all(!grepl('^-', c(args[i:length(args)])))) positionals[length(positionals)+1] <- p
+      else {
+        # unrecognized argument
+        unk <- unk + 1
+        mydata[["unknowns"]][unk] <- p
+        writeLines (paste("Warning: parse_command_line(): unknown param:", p))
+      }
+      i <- i + 1
+      next
+    }
     else {
       # unrecognized argument
       unk <- unk + 1
@@ -602,6 +595,34 @@ parse_command_line <- function(args) {
     }
     i <- i + 1 # advance to next param
   }
+
+  # process positionals
+  if (any(!is.na(positionals))) {
+    # lose the first element, which is NA
+    positionals <- positionals[which(!is.na(positionals))]
+    # get indices of positions from args_table
+    index <- which(args_table$argType == argsType$TypePositional)
+    # if positional arguments are missing...
+    if (length(index) > length(positionals)) {
+      usage()
+      writeLines(paste0("parse_command_line(): one or more positional arguments missing"))
+      stop(call. = FALSE)
+    }
+    else if (length(index) == length(positionals)) {
+      for (i in index) {
+        myrow <- args_table[i,]
+        mydata[[myrow$var]] <- positionals[i]
+      }
+    }
+    else { # there are more positionals provided than required.
+      for (i in seq_along(index)) {
+        myrow <- args_table[index[i],]
+        mydata[[myrow$var]] <- positionals[i]
+      }
+      # copy the remaining values into the last positional argument
+      mydata[[myrow$var]] <- c(mydata[[myrow$var]], positionals[(i+1):length(positionals)])
+    }
+  } # positionals
   return (mydata)
 } # new_parse_command_line
 
