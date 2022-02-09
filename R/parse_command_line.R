@@ -609,8 +609,8 @@ parse_command_line <- function(args) {
       stop(call. = FALSE)
     }
     else if (length(index) == length(positionals)) {
-      for (i in index) {
-        myrow <- args_table[i,]
+      for (i in seq_along(index)) {
+        myrow <- args_table[index[i],]
         mydata[[myrow$var]] <- positionals[i]
       }
     }
