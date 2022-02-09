@@ -77,11 +77,11 @@ usage <- function() {
   }
   writeLines('')
 
-  # add a help argument if none provided
-  if ((!"--help" %in% args_table$lparam) && (!"-?" %in% args_table$sparam)) {
-    args_table <- rbind(args_table, data.frame(lparam="--help",sparam="-?",var="help",default=FALSE,
-                                               argType=argsType$TypeBool,help="Display help message"))
-  }
+  # # add a help argument if none provided
+  # if ((!"--help" %in% args_table$lparam) && (!"-?" %in% args_table$sparam)) {
+  #   args_table <- rbind(args_table, data.frame(lparam="--help",sparam="-?",var="help",default=FALSE,
+  #                                              argType=argsType$TypeBool,help="Display help message"))
+  # }
 
   # sort the tables alphabetically
   args_table <- args_table[order(args_table$lparam),]
@@ -157,8 +157,9 @@ init_command_line_parser <- function (script, desc, ver = NA) {
   pkg.globals$desc_str <- desc
   pkg.globals$ver <- ver
   # tables to hold the possible command line params
-  pkg.globals$args_table <- data.frame(lparam = NA, sparam = NA, var = NA, default = NA, argType = NA,
-                           help = NA, stringsAsFactors = FALSE)
+  pkg.globals$args_table <- data.frame(lparam = c(NA,'--help'), sparam = c(NA,'-?'), var = c(NA,NA),
+                                       default = c(NA,FALSE), argType = c(NA,argsType$TypeBool),
+                                       help = c(NA,"Display help message"), stringsAsFactors = FALSE)
   pkg.globals$cmds_table <- data.frame(cmd = NA, help = NA, stringsAsFactors = FALSE)
   pkg.globals$subcmds_table <- data.frame(subcmd = NA, parent = NA, help = NA, stringsAsFactors = FALSE)
 
