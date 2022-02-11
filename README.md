@@ -15,13 +15,14 @@ Given a command line such as `Rscript MyCheckbook.R withdraw cash --amount=100 -
 
 Note that the user need not provide all registered arguments on the command line. The default parameter passed to `reg_argument_list()` preloads the default. Thus, you could have an argument whose default value is FALSE. When `parse_command_line()` is called, the variable will be set to FALSE, unless the user includes in the command line, in which case it flips to TRUE.
 
-When registering arguments, you must indicate the type of value you expect to receive. Valid parameter types are `argsType$TypeBool` for Boolean values; `argsType$TypeValue` for arguments such as `--outfile=file`, `--outfile file`, and `-o file`; and `argsType$TypeMultiVal` for parameters where multiple values can be supplied, such as keywords: `-k key1 -k key2`. 
-
-`argsType$TypeCount` allows for parameters whose value increments each time the argument is used. Thus `-v -v -v` would return a value of 3. Short parameters can be combined, so `-vvv` is equivalent to `-v -v -v`.
+When registering arguments, you must indicate the type of value you expect to receive. Valid parameter types are: 
+- `argsType$TypeBool` for Boolean values. Using the argument flips the default value. Thus, if the default value of `--plot` is `FALSE`, including `--plot` on the command line will set its value to `TRUE`. Arguments of the form `--plot=TRUE` and `--plot=F` are also allowed. 
+- `argsType$TypeCount` allows for parameters whose value increments each time the argument is used. Thus `-v -v -v` returns a value of 3. Note that short parameters can be combined, so `-vvv` is equivalent to `-v -v -v`.
+- `argsType$TypeMultiVal` for parameters where multiple values can be supplied, such as keywords: `-k key1 -k key2`
+- `argsType$TypeRange` separates two strings separated by a colon into substrings, each of which is stored in `<var>1` and `<var>2`. For instance, an argument `--range` with variable name `range`: `--range 2020:2022` yields `range1` (2020) and `range2` (2022).
+- `argsType$TypeValue` for arguments such as `--outfile=file`, `--outfile file`, and `-o file`
 
 "Positional" arguments -- i.e., required arguments at the far right of the command line -- are supported using `reg_positionals_list()`. Multiple positional arguments can be supplied; they will be filled (from left-to-right) in the order given in the call to `reg_positionals_list()`.
-
-If `argsType$TypeBool` is used, using the argument flips the default Boolean value. So for instance, if you call `reg_argument_list(c("--plot","-p","plot",FALSE,argsType$TypeBool,'plot output'))`, the default value of `plot` is `FALSE`. If `--plot` (or `-p`) is included in the argument list, `plot` will be set to `TRUE`. Arguments of the form `--plot=TRUE` are also allowed.
 
 The return value of `parse_command_line()` is a list (say, `mydata`) in which each entry is named according to the variable name (i.e., the third element) passed to `reg_argument_list()`. Commands and subcommands are stored in `mydata$command` and `mydata$subcmd` respectively. Unrecognized arguments are stored in `mydata$unknowns`.
 
@@ -112,7 +113,33 @@ $unknowns
 [1] "-z"
 ```
 
-`cmdparseR` provides a `usage()` function to create a formatted help message based on the `desc` strings passed to `reg_argument_list()`, `reg_command_list()` and `reg_subcmd_list()`. By default, `--help` or `-?` on the command line will call this function. 
+`cmdparseR` provides a `usage()` function to create a formatted help message based on the `desc` strings passed to `reg_argument_list()`, `reg_command_list()` and `reg_subcmd_list()`. By default, `--help` or `-?` on the command line will call this function:
+
+```
+$ Rscript test_cmdparseR.R -?
+
+test_cmdparseR: Test cmdparseR package
+  USAGE: Rscript test_cmdparseR <optional arguments> [outfile] [infiles]
+      Ver: 0.1.0
+
+  REQUIRED ARGUMENTS: 
+      outfile         : Output filename
+      infiles         : Input filename(s)
+
+  OPTIONAL ARGUMENTS:
+      --config    (-c): Configuration file
+                           default: ~/myconfigfile.txt
+      --daterange (-r): Date range
+      --debug     (-d): Display debug messages
+                           default: FALSE
+      --help      (-?): Display help message
+                           default: FALSE
+      --keywords  (-k): Search keywords
+      --verbose   (-v): Verbosity level
+                           default: 0
+Error: 
+Execution halted
+```
 
 A `parse_date()` function takes a string formatted as `YYYY-MM-DD`, `YYYY-MM` or `YYYY` and returns a tuple of integers. For instance, `parse_date('2022-01-31')` returns `c(2022, 1, 31)`; `parse_date('2022-01')` returns `c(2022, 1, NA)`, and `parse_date('2021')` returns `c(2021, NA, NA)`.
 
