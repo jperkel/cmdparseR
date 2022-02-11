@@ -22,9 +22,11 @@ When registering arguments, you must indicate the type of value you expect to re
 
 If `argsType$TypeBool` is used, using the argument flips the default Boolean value. So for instance, if you call `reg_argument_list(c("--plot","-p","plot",FALSE,argsType$TypeBool,'plot output'))`, the default value of `plot` is `FALSE`. If `--plot` (or `-p`) is included in the argument list, `plot` will be set to `TRUE`. Arguments of the form `--plot=TRUE` are also allowed.
 
+The return value of `parse_command_line()` is a list (say, `mydata`) in which each entry is named according to the variable name (i.e., the third element) passed to `reg_argument_list()`. Commands and subcommands are stored in `mydata$command` and `mydata$subcmd` respectively. Unrecognized arguments are stored in `mydata$unknowns`.
+
 ## Installation
 
-You can install cmdparseR from [GitHub](https://github.com/jperkel/cmdparseR) with:
+Install cmdparseR from [GitHub](https://github.com/jperkel/cmdparseR) with:
 
 ``` r
 # install.packages("devtools")
@@ -33,89 +35,84 @@ devtools::install_github('jperkel/cmdparseR')
 
 ## Example
 
-This is a basic example:
+The file `test_cmdparseR.R` provides a simple example:
 
 ``` r
 library(cmdparseR)
 
-init_command_line_parser('MyCheckbook.R','My checkbook program', '1.0.0')
+main <- function() {
+  init_command_line_parser('test_cmdparseR','Test cmdparseR package','0.1.0')
 
-# register arguments as a list of vectors: --lparam, -sparam, variable_name, 
-#   default_value, type, help message
-arguments <- list(
-  # example TypeBool argument. Use as '--lparam' or '-sparam'
-  c("--debug","-x","debug",FALSE,argsType$TypeBool,'print debug messages'),
-  
-  # example TypeValue arguments. Use as '--lparam=val', '--lparam val', or '-l val'
-  c("--archive","-r","archive",NA,argsType$TypeValue,'location of your backup file'),
-  c("--date","-d","date",NA,argsType$TypeValue,'specify date'),
-  c("--msg","-m","msg",NA,argsType$TypeValue,'memo line message'),
-  c("--amount","-a","amount",NA,argsType$TypeValue,'specify dollar amount'),
-  c("--payee","-p","payee",NA,argsType$TypeValue,'specify payee'),
-  c("--number","-n","cknum",NA,argsType$TypeValue,'specify check number'),
-  
-  # an example TypeMultiVal, where all supplied params are stored
-  c("--keyword","-k","keyword",NA,argsType$TypeMultiVal,'keyword search terms'),
-  
-  # an example TypeCount, where each use of the param increments a variable
-  c("--verbose","-v","verbose",0,argsType$TypeCount,'verbose level')
-)
-reg_argument_list(arguments)
+  args <- list(
+    c('--config','-c','config','~/myconfigfile.txt',argsType$TypeValue,'Configuration file'),
+    c('--debug','-d','debug',FALSE,argsType$TypeBool,'Display debug messages'),
+    c('--keywords','-k','keywords',NA,argsType$TypeMultiVal,'Search keywords'),
+    c('--daterange','-r','daterange',NA,argsType$TypeRange,'Date range'),
+    c('--verbose','-v','verbose',0,argsType$TypeCount,'Verbosity level')
+  )
+  reg_argument_list(args)
 
-# register commands: command, help text
-cmds <- list(
-  c("withdraw", "add a withdrawal"),
-  c("plot", "graph output"),
-  c("deposit", "add a deposit"),
-  c("edit", "update a record"),
-  c("find", "find a record")
-)
-reg_command_list(cmds)
+  pos <- list(
+    c('outfile',NA,'Output filename'),
+    c('infiles',NA,'Input filename(s)')
+  )
+  reg_positionals_list(pos)
 
-# register subcommands: subcommand, parent command to which it applies, help text
-subcmds <- list(
-  c("cash", "withdraw", "add a cash withdrawal")
-  c("check", "withdraw", "add a check withdrawal")
-  c("paycheck", "deposit", "add a paycheck deposit"),
-  c("reimbursement", "deposit", "add a reimbursement"),
-  c("bankfee", "withdraw", "add a bank fee")
-)
-reg_subcmd_list(subcmds)
+  args <- commandArgs(trailingOnly = TRUE)
+  mydata <- parse_command_line(args)
 
-# register positional arguments: variable name, default value, help text
-pos <- list(
-  c("file1",NA,"file 1"),
-  c("file2",NA,"file 2")
-)
-reg_positionals_list(pos)
+  print(mydata)
+}
 
-# get command line arguments from the system
-args <- commandArgs(trailingOnly = TRUE)
-# parse them
-mydata <- parse_command_line(args)
+main()
 ```
 
-`mydata` is a list in which each entry is named according to the variable name (i.e., the third element) passed to `reg_argument_list()`. Commands and subcommands are stored in `mydata$command` and `mydata$subcmd` respectively. Unrecognized arguments are stored in `mydata$unknowns`.
+Invoked like so:
 
-``` r
-# get values as mydata$<variable_name>, eg: 
-writeLines ("\nAfter parse_command_line()...")
-writeLines (paste("debug mode:",debug))
-writeLines (paste("command:",mydata$command))
-writeLines (paste("subcommand:",mydata$subcmd))
-writeLines (paste("archive:", mydata$archive))
-writeLines (paste("date:",mydata$date))
-writeLines (paste("msg:",mydata$msg))
-writeLines (paste("amount:",mydata$amount))
-writeLines (paste("payee:",mydata$payee))
-writeLines (paste("cknum:",mydata$cknum))
-writeLines (paste("keywords:",mydata$keyword))
-writeLines (paste("unknowns:",mydata$unknowns))
-writeLines (paste("verbose level:", mydata$verbose))
-writeLines (paste("file 1:", mydata$file1))
-writeLines (paste("file 2:", mydata$file2))
-``` 
+```
+Rscript test_cmdparseR.R -d -vvv -k key1 -k key2 -r 2020:2022 -z outfile.txt infile1.txt infile2.txt infile3.txt
+```
+
+you should see the following:
+```
+$ Rscript test_cmdparseR.R -d -vvv -k key1 -k key2 -r 2020:2022 -z outfile.txt infile1.txt infile2.txt infile3.txt
+Warning: parse_command_line(): unknown param: -z
+$help
+[1] "FALSE"
+
+$config
+[1] "~/myconfigfile.txt"
+
+$debug
+[1] TRUE
+
+$keywords
+[1] "key1" "key2"
+
+$daterange
+[1] "2020:2022"
+
+$verbose
+[1] 3
+
+$outfile
+[1] "outfile.txt"
+
+$infiles
+[1] "infile1.txt" "infile2.txt" "infile3.txt"
+
+$daterange1
+[1] "2020"
+
+$daterange2
+[1] "2022"
+
+$unknowns
+[1] "-z"
+```
 
 `cmdparseR` provides a `usage()` function to create a formatted help message based on the `desc` strings passed to `reg_argument_list()`, `reg_command_list()` and `reg_subcmd_list()`. By default, `--help` or `-?` on the command line will call this function. 
+
+A `parse_date()` function takes a string formatted as `YYYY-MM-DD`, `YYYY-MM` or `YYYY` and returns a tuple of integers. For instance, `parse_date('2022-01-31')` returns `c(2022, 1, 31)`; `parse_date('2022-01')` returns `c(2022, 1, NA)`, and `parse_date('2021')` returns `c(2021, NA, NA)`.
 
 

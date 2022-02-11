@@ -597,7 +597,8 @@ parse_command_line <- function(args) {
   }
 
   # process positionals
-  if (any(!is.na(positionals))) {
+  # if (any(!is.na(positionals))) {
+  if (any(args_table$argType == argsType$TypePositional)) {
     # lose the first element, which is NA
     positionals <- positionals[which(!is.na(positionals))]
     # get indices of positions from args_table
