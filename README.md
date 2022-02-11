@@ -2,6 +2,7 @@
 # cmdparseR
 
 <!-- badges: start -->
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/jperkel/cmdparseR?include_prereleases)
 <!-- badges: end -->
 
 `cmdparseR` provides simple command-line parsing for R scripts. It supports optional commands and subcommands, and both Boolean and value-based arguments. 
