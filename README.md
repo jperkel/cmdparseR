@@ -162,6 +162,6 @@ Error:
 Execution halted
 ```
 
-A `parse_date()` function takes a string formatted as `YYYY-MM-DD`, `YYYY-MM` or `YYYY` and returns a tuple of integers. For instance, `parse_date('2022-01-31')` returns `c(2022, 1, 31)`; `parse_date('2022-01')` returns `c(2022, 1, NA)`, and `parse_date('2021')` returns `c(2021, NA, NA)`.
+A `parse_date()` function takes a string formatted as `YYYY-MM-DD`, `YYYY-MM` or `YYYY` and returns a vector of integers. For instance, `parse_date('2022-01-31')` returns `c(2022, 1, 31)`; `parse_date('2022-01')` returns `c(2022, 1, NA)`, and `parse_date('2021')` returns `c(2021, NA, NA)`.
 
 
