@@ -145,8 +145,18 @@ $unknowns
 $ Rscript test_cmdparseR.R -?
 
 test_cmdparseR: Test cmdparseR package
-  USAGE: Rscript test_cmdparseR <optional arguments> [outfile] [infiles]
+  USAGE: Rscript test_cmdparseR [COMMAND] [SUBCOMMAND] <optional arguments> [outfile] [infiles]
       Ver: 0.1.0
+
+  COMMANDS:
+      add    : Add something
+          SUBCOMMANDS:
+              file : Add a file
+              name : Add a name
+      delete : Delete something
+          SUBCOMMANDS:
+              file : Delete a file
+              name : Delete a name
 
   REQUIRED ARGUMENTS: 
       outfile         : Output filename
