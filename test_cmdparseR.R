@@ -3,6 +3,20 @@ library(cmdparseR)
 main <- function() {
   init_command_line_parser('test_cmdparseR','Test cmdparseR package','0.1.0')
 
+  cmds <- list(
+    c('add', 'Add something'),
+    c('delete', 'Delete something'),
+  )
+  reg_command_list(cmds)
+  
+  subcmds <- list(
+    c('name','add','Add a name'),
+    c('file','add','Add a file'),
+    c('name','delete','Delete a name'),
+    c('file','delete','Delete a file')
+  )
+  reg_subcmd_list(subcmds)
+
   args <- list(
     c('--config','-c','config','~/myconfigfile.txt',argsType$TypeValue,'Configuration file'),
     c('--debug','-d','debug',FALSE,argsType$TypeBool,'Display debug messages'),
