@@ -45,6 +45,20 @@ library(cmdparseR)
 main <- function() {
   init_command_line_parser('test_cmdparseR','Test cmdparseR package','0.1.0')
 
+  cmds <- list(
+    c('add', 'Add something'),
+    c('delete', 'Delete something')
+  )
+  reg_command_list(cmds)
+  
+  subcmds <- list(
+    c('name','add','Add a name'),
+    c('file','add','Add a file'),
+    c('name','delete','Delete a name'),
+    c('file','delete','Delete a file')
+  )
+  reg_subcmd_list(subcmds)
+  
   args <- list(
     c('--config','-c','config','~/myconfigfile.txt',argsType$TypeValue,'Configuration file'),
     c('--debug','-d','debug',FALSE,argsType$TypeBool,'Display debug messages'),
@@ -72,18 +86,18 @@ main()
 Invoked like so:
 
 ```
-Rscript test_cmdparseR.R -d -vvv -k key1 -k key2 -r 2020:2022 -z outfile.txt infile1.txt infile2.txt infile3.txt
+Rscript test_cmdparser.R add file -c ~/tmp/config.txt -d -vvv -k key1 -k key2 -z -r 2020:2022 outfile.txt infile1.txt infile2.txt infile3.txt
 ```
 
 you should see the following:
 ```
-$ Rscript test_cmdparseR.R -d -vvv -k key1 -k key2 -r 2020:2022 -z outfile.txt infile1.txt infile2.txt infile3.txt
+$ Rscript test_cmdparser.R add file -c ~/tmp/config.txt -d -vvv -k key1 -k key2 -z -r 2020:2022 outfile.txt infile1.txt infile2.txt infile3.txt
 Warning: parse_command_line(): unknown param: -z
 $help
 [1] "FALSE"
 
 $config
-[1] "~/myconfigfile.txt"
+[1] "~/Users/username/tmp/config.txt"
 
 $debug
 [1] TRUE
@@ -103,14 +117,21 @@ $outfile
 $infiles
 [1] "infile1.txt" "infile2.txt" "infile3.txt"
 
+$command
+[1] "add"
+
+$subcmd
+[1] "file"
+
+$unknowns
+[1] "-z"
+
 $daterange1
 [1] "2020"
 
 $daterange2
 [1] "2022"
 
-$unknowns
-[1] "-z"
 ```
 
 `cmdparseR` provides a `usage()` function to create a formatted help message based on the `desc` strings passed to `reg_argument_list()`, `reg_command_list()` and `reg_subcmd_list()`. By default, `--help` or `-?` on the command line will call this function:
