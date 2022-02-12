@@ -73,9 +73,9 @@ main <- function() {
   reg_argument_list(args)
 
   pos <- list(
-    # variable name, default, help string
-    c('outfile',NA,'Output filename'),
-    c('infiles',NA,'Input filename(s)')
+    # variable name, help string
+    c('outfile','Output filename'),
+    c('infiles','Input filename(s)')
   )
   reg_positionals_list(pos)
 
@@ -91,18 +91,18 @@ main()
 Invoked like so:
 
 ```
-Rscript test_cmdparser.R add file -c ~/tmp/config.txt -d -vvv -k key1 -k key2 -z -r 2020:2022 outfile.txt infile1.txt infile2.txt infile3.txt
+Rscript test_cmdparseR.R add name -dvvv -r 2020:2022 -z -k key1 -k key2 outfile.txt infile1.txt infile2.txt infile3.txt
 ```
 
 you should see the following:
 ```
-$ Rscript test_cmdparser.R add file -c ~/tmp/config.txt -d -vvv -k key1 -k key2 -z -r 2020:2022 outfile.txt infile1.txt infile2.txt infile3.txt
+$ Rscript test_cmdparseR.R add name -dvvv -r 2020:2022 -z -k key1 -k key2 outfile.txt infile1.txt infile2.txt infile3.txt
 Warning: parse_command_line(): unknown param: -z
 $help
 [1] "FALSE"
 
 $config
-[1] "~/Users/username/tmp/config.txt"
+[1] "~/myconfigfile.txt"
 
 $debug
 [1] TRUE
@@ -126,16 +126,16 @@ $command
 [1] "add"
 
 $subcmd
-[1] "file"
-
-$unknowns
-[1] "-z"
+[1] "name"
 
 $daterange1
 [1] "2020"
 
 $daterange2
 [1] "2022"
+
+$unknowns
+[1] "-z"
 
 ```
 

@@ -10,7 +10,7 @@ parse_date(d)
 \item{d}{the date to parse (string)}
 }
 \value{
-A tuple: c(y, m, d)
+A vector: c(y, m, d)
 }
 \description{
 Parses a date in YYYY-MM-DD, YYYYMMDD, YYYY-MM or YYYY format

@@ -7,11 +7,11 @@
 reg_positionals_list(plist)
 }
 \arguments{
-\item{plist}{list of positional arguments: variable name, default value, help text}
+\item{plist}{list of positional arguments: variable name, help text}
 }
 \description{
 Register a list of 'positional' arguments
 }
 \examples{
-args <- list(c("infile",NA,"input file"))
+args <- list(c("infile","input file"))
 }

@@ -8,7 +8,7 @@ main <- function() {
     c('delete', 'Delete something')
   )
   reg_command_list(cmds)
-  
+
   subcmds <- list(
     c('name','add','Add a name'),
     c('file','add','Add a file'),
@@ -27,8 +27,8 @@ main <- function() {
   reg_argument_list(args)
 
   pos <- list(
-    c('outfile',NA,'Output filename'),
-    c('infiles',NA,'Input filename(s)')
+    c('outfile','Output filename'),
+    c('infiles','Input filename(s)')
   )
   reg_positionals_list(pos)
 

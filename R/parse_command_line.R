@@ -307,25 +307,25 @@ reg_argument_list <- function(plist) {
 
 #
 # Register a 'positional' command line argument (ie, the last argument in the list)
-reg_positionals <- function(var, default, help) {
-  reg_argument (lparam = NA, sparam = NA, var = var, default = default, argType = argsType$TypePositional, help = help)
+reg_positionals <- function(var, help) {
+  reg_argument (lparam = NA, sparam = NA, var = var, default = NA, argType = argsType$TypePositional, help = help)
 } # reg_positionals
 
 
 #' Register a list of 'positional' arguments
 #'
-#' @param plist list of positional arguments: variable name, default value, help text
+#' @param plist list of positional arguments: variable name, help text
 #'
 #' @export
 #'
 #' @examples
-#' args <- list(c("infile",NA,"input file"))
+#' args <- list(c("infile","input file"))
 reg_positionals_list <- function(plist) {
-  ids <- c("var","default","help")
+  ids <- c("var","help")
 
   for (p in plist) {
     stopifnot(length(p) == length(ids))
-    reg_positionals(var = p[1], default = p[2], help = p[3])
+    reg_positionals(var = p[1], help = p[2])
   }
 } # reg_positionals_list
 
@@ -334,7 +334,7 @@ reg_positionals_list <- function(plist) {
 #'
 #' @param d the date to parse (string)
 #'
-#' @return A tuple: c(y, m, d)
+#' @return A vector: c(y, m, d)
 #' @export
 #'
 #' @examples
