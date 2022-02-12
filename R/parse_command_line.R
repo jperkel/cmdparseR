@@ -2,15 +2,6 @@
 ## parse_command_line.R: functions for parsing command line parameters
 ##
 ## (c) 2019 Jeffrey M. Perkel
-##
-## Version history
-## 1.0.0 -- 12 Jul 2019 -- initial release
-## 1.0.1 -- 16 Jul 2019 -- autogenerate usage display
-## 1.0.2 -- 28 Jul 2019 -- support parsing of commands
-## 1.0.3 -- 26 Aug 2019 -- add subcommand support
-## 1.0.4 -- 27 Feb 2020 -- args, cmds and subcmds can be supplied as lists
-## 1.0.5 -- 29 Feb 2020 -- support config.txt file
-## 1.1.0 -- 23 Dec 2020 -- supports scoping of arguments, ie associating with specific commands/subcmds
 ##########################
 
 
