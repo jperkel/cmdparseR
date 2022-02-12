@@ -5,7 +5,7 @@ main <- function() {
 
   cmds <- list(
     c('add', 'Add something'),
-    c('delete', 'Delete something'),
+    c('delete', 'Delete something')
   )
   reg_command_list(cmds)
   
