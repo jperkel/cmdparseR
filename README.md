@@ -13,7 +13,7 @@ To use, call `init_command_line_parser()` to initialize the parsing tool. Then c
 
 Given a command line such as `Rscript MyCheckbook.R withdraw cash --amount=100 --msg='birthday gift'`, `withdraw` is the command, `cash` is a subcommand and `--amount=100` and `--msg='birthday gift'` are arguments. You might also add a `deposit` command, and a `check` subcommand, eg `MyCheckbook.R withdraw check --number=123 --amount=50 --payee='Electric Co.'` to log a check to the electric company.)
 
-Note that the user need not provide all registered arguments on the command line. The default parameter passed to `reg_argument_list()` preloads the default. Thus, you could have an argument whose default value is FALSE. When `parse_command_line()` is called, the variable will be set to FALSE, unless the user includes in the command line, in which case it flips to TRUE.
+Note that the user need not provide all registered arguments on the command line. The default parameter passed to `reg_argument_list()` preloads the default. 
 
 When registering arguments, you must indicate the type of value you expect to receive. Valid parameter types are: 
 - `argsType$TypeBool` for Boolean values. Using the argument flips the default value. Thus, if the default value of `--plot` is `FALSE`, including `--plot` on the command line will set its value to `TRUE`. Arguments of the form `--plot=TRUE` and `--plot=F` are also allowed. 
@@ -43,15 +43,18 @@ The file `test_cmdparseR.R` provides a simple example:
 library(cmdparseR)
 
 main <- function() {
+  # script name, script description, version number
   init_command_line_parser('test_cmdparseR','Test cmdparseR package','0.1.0')
 
   cmds <- list(
+    # command, help string
     c('add', 'Add something'),
     c('delete', 'Delete something')
   )
   reg_command_list(cmds)
   
   subcmds <- list(
+    # subcommand, parent command, help string
     c('name','add','Add a name'),
     c('file','add','Add a file'),
     c('name','delete','Delete a name'),
@@ -60,6 +63,7 @@ main <- function() {
   reg_subcmd_list(subcmds)
   
   args <- list(
+    # long parameter form, short parameter form, variable name, default value, argument type, help string
     c('--config','-c','config','~/myconfigfile.txt',argsType$TypeValue,'Configuration file'),
     c('--debug','-d','debug',FALSE,argsType$TypeBool,'Display debug messages'),
     c('--keywords','-k','keywords',NA,argsType$TypeMultiVal,'Search keywords'),
@@ -69,6 +73,7 @@ main <- function() {
   reg_argument_list(args)
 
   pos <- list(
+    # variable name, default, help string
     c('outfile',NA,'Output filename'),
     c('infiles',NA,'Input filename(s)')
   )
