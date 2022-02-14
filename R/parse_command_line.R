@@ -538,7 +538,12 @@ parse_command_line <- function(args) {
     myrow <- args_table[index,]
 
     if(myrow$argType == argsType$TypeBool) { # if the param is a logical type, save the opposite logical type
-      mydata[[myrow$var]] <- !as.logical(myrow$default)
+      if (has_equals) {
+        val <- strsplit(p, "=")[[1]][2]
+        if (!is.na(as.logical(val))) mydata[[myrow$var]] <- as.logical(val)
+        else writeLines(paste("Warning: parse_command_line(): non-Boolean value provided to Boolean argument ignored:", p))
+      }
+      else mydata[[myrow$var]] <- !as.logical(myrow$default)
     }
 
     else if (myrow$argType == argsType$TypeCount) {
