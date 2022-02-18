@@ -599,26 +599,34 @@ parse_command_line <- function(args) {
     positionals <- positionals[which(!is.na(positionals))]
     # get indices of positions from args_table
     index <- which(args_table$argType == argsType$TypePositional)
-    # if positional arguments are missing...
-    if (length(index) > length(positionals)) {
-      usage()
-      writeLines(paste0("parse_command_line(): one or more positional arguments missing"))
-      stop(call. = FALSE)
+    for (i in seq_along(index)) {
+      myrow <- args_table[index[i],]
+      mydata[[myrow$var]] <- positionals[i]
     }
-    else if (length(index) == length(positionals)) {
-      for (i in seq_along(index)) {
-        myrow <- args_table[index[i],]
-        mydata[[myrow$var]] <- positionals[i]
-      }
-    }
-    else { # there are more positionals provided than required.
-      for (i in seq_along(index)) {
-        myrow <- args_table[index[i],]
-        mydata[[myrow$var]] <- positionals[i]
-      }
-      # copy the remaining values into the last positional argument
+    if (length(index) < length(positionals)) {
+      # ie, if more positionals provided than expected, copy the remainder into the last positional variable
       mydata[[myrow$var]] <- c(mydata[[myrow$var]], positionals[(i+1):length(positionals)])
     }
+    # # if positional arguments are missing...
+    # if (length(index) > length(positionals)) {
+    #   usage()
+    #   writeLines(paste0("parse_command_line(): one or more positional arguments missing"))
+    #   stop(call. = FALSE)
+    # }
+    # else if (length(index) == length(positionals)) {
+    #   for (i in seq_along(index)) {
+    #     myrow <- args_table[index[i],]
+    #     mydata[[myrow$var]] <- positionals[i]
+    #   }
+    # }
+    # else { # there are more positionals provided than required.
+    #   for (i in seq_along(index)) {
+    #     myrow <- args_table[index[i],]
+    #     mydata[[myrow$var]] <- positionals[i]
+    #   }
+    #   # copy the remaining values into the last positional argument
+    #   mydata[[myrow$var]] <- c(mydata[[myrow$var]], positionals[(i+1):length(positionals)])
+    # }
   } # positionals
   return (mydata)
 } # new_parse_command_line

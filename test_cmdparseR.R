@@ -35,6 +35,12 @@ main <- function() {
   args <- commandArgs(trailingOnly = TRUE)
   mydata <- parse_command_line(args)
 
+  if (is.na(mydata$outfile)) stop("Error: no outfile provided.")
+  # read input from stdin if no input files provided on the cmd line.
+  if (is.na(mydata$infiles[1])) {
+    lines <- readLines(con = file("stdin"))
+    mydata$infiles <- lines
+  }
   print(mydata)
 }
 
