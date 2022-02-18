@@ -437,6 +437,9 @@ parse_command_line <- function(args) {
   names(mydata) <- args_table$var
   for (name in names(mydata)) {
     mydata[[name]] <- args_table$default[args_table$var == name]
+    if (args_table$argType[args_table$var == name] == argsType$TypeBool) {
+      mydata[[name]] <- as.logical(mydata[[name]])
+    }
   }
 
   # counter
