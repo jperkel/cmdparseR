@@ -7,17 +7,17 @@
 reg_subcmd_list(slist)
 }
 \arguments{
-\item{slist}{list of subcommands}
+\item{slist}{list of lists of subcommands: subcmd, parent, help string}
 }
 \description{
 Register subcommands using a list
 }
 \examples{
 subcmds <- list(
-c("paycheck", "deposit", "add a paycheck deposit"),
-c("reimbursement", "deposit", "add a reimbursement"),
-c("bankfee", "withdraw", "add a bank fee"),
-c("check", "deposit", "add a check deposit")
+list("paycheck", "deposit", "add a paycheck deposit"),
+list("reimbursement", "deposit", "add a reimbursement"),
+list("bankfee", "withdraw", "add a bank fee"),
+list("check", "deposit", "add a check deposit")
 )
 reg_subcmd_list(subcmds)
 }

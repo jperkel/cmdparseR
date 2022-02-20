@@ -48,34 +48,35 @@ main <- function() {
 
   cmds <- list(
     # command, help string
-    c('add', 'Add something'),
-    c('delete', 'Delete something')
+    list('add', 'Add something'),
+    list('delete', 'Delete something')
   )
   reg_command_list(cmds)
   
   subcmds <- list(
     # subcommand, parent command, help string
-    c('name','add','Add a name'),
-    c('file','add','Add a file'),
-    c('name','delete','Delete a name'),
-    c('file','delete','Delete a file')
+    list('name','add','Add a name'),
+    list('file','add','Add a file'),
+    list('name','delete','Delete a name'),
+    list('file','delete','Delete a file')
   )
   reg_subcmd_list(subcmds)
   
   args <- list(
     # long parameter form, short parameter form, variable name, default value, argument type, help string
-    c('--config','-c','config','~/myconfigfile.txt',argsType$TypeValue,'Configuration file'),
-    c('--debug','-d','debug',FALSE,argsType$TypeBool,'Display debug messages'),
-    c('--keywords','-k','keywords',NA,argsType$TypeMultiVal,'Search keywords'),
-    c('--daterange','-r','daterange',NA,argsType$TypeRange,'Date range'),
-    c('--verbose','-v','verbose',0,argsType$TypeCount,'Verbosity level')
+    list('--config','-c','config','~/myconfigfile.txt',argsType$TypeValue,'Configuration file'),
+    list('--debug','-d','debug',FALSE,argsType$TypeBool,'Display debug messages'),
+    list('--keywords','-k','keywords',NA,argsType$TypeMultiVal,'Search keywords'),
+    list('--daterange','-r','daterange',NA,argsType$TypeRange,'Date range'),
+    list('--username','-u','username',NA,argsType$TypeValue,'User name'),
+    list('--verbose','-v','verbose',0,argsType$TypeCount,'Verbosity level')
   )
   reg_argument_list(args)
 
   pos <- list(
     # variable name, help string
-    c('outfile','Output filename'),
-    c('infiles','Input filename(s)')
+    list('outfile','Output filename'),
+    list('infiles','Input filename(s)')
   )
   reg_positionals_list(pos)
 
@@ -96,10 +97,10 @@ Rscript test_cmdparseR.R add name -dvvv -r 2020:2022 -z -k key1 -k key2 outfile.
 
 you should see the following:
 ```
-$ Rscript test_cmdparseR.R add name -dvvv -r 2020:2022 -z -k key1 -k key2 outfile.txt infile1.txt infile2.txt infile3.txt
+Rscript test_cmdparseR.R add name -dvvv -r 2020:2022 -z -k key1 -k key2 outfile.txt infile1.txt infile2.txt infile3.txt
 Warning: parse_command_line(): unknown param: -z
 $help
-[1] "FALSE"
+[1] FALSE
 
 $config
 [1] "~/myconfigfile.txt"
@@ -112,6 +113,9 @@ $keywords
 
 $daterange
 [1] "2020:2022"
+
+$username
+[1] NA
 
 $verbose
 [1] 3
@@ -171,6 +175,7 @@ test_cmdparseR: Test cmdparseR package
       --help      (-?): Display help message
                            default: FALSE
       --keywords  (-k): Search keywords
+      --username  (-u): User name
       --verbose   (-v): Verbosity level
                            default: 0
 Error: 

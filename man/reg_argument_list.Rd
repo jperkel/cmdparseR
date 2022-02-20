@@ -7,17 +7,17 @@
 reg_argument_list(plist)
 }
 \arguments{
-\item{plist}{list of arguments}
+\item{plist}{list of lists of arguments: lparam, sparam, var, default, argType, help string}
 }
 \description{
 Register command line arguments
 }
 \examples{
 arguments <- list(
-  c("--outfile","-o","outfile",NA,argsType$TypeValue,'location of output file'),
-  c("--date","-d","date",NA,argsType$TypeValue,'specify date'),
-  c("--msg","-m","msg",NA,argsType$TypeValue,'memo line message'),
-  c("--amount","-a","amount",NA,argsType$TypeValue,'specify dollar amount'),
-  c("--payee","-p","payee",NA,argsType$TypeValue,'specify payee'))
+  list("--outfile","-o","outfile",NA,argsType$TypeValue,'location of output file'),
+  list("--date","-d","date",NA,argsType$TypeValue,'specify date'),
+  list("--msg","-m","msg",NA,argsType$TypeValue,'memo line message'),
+  list("--amount","-a","amount",NA,argsType$TypeValue,'specify dollar amount'),
+  list("--payee","-p","payee",NA,argsType$TypeValue,'specify payee'))
 reg_argument_list(arguments)
 }

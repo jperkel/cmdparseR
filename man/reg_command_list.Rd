@@ -7,18 +7,18 @@
 reg_command_list(clist)
 }
 \arguments{
-\item{clist}{list of commands}
+\item{clist}{list of lists of commands: command, help string}
 }
 \description{
 Register commands using a list
 }
 \examples{
 cmds <- list(
-  c("withdraw", "add a withdrawal"),
-  c("plot", "graph output"),
-  c("deposit", "add a deposit"),
-  c("edit", "update a record"),
-  c("find", "find a record")
+  list("withdraw", "add a withdrawal"),
+  list("plot", "graph output"),
+  list("deposit", "add a deposit"),
+  list("edit", "update a record"),
+  list("find", "find a record")
 )
 reg_command_list(cmds)
 }

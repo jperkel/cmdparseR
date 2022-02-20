@@ -6,6 +6,7 @@
 
 
 pkg.globals <- new.env()
+pkg.globals$initialized <- FALSE
 
 #' Define an enum for different modes; access with argsType$<enum_element>
 #' ht https://stackoverflow.com/questions/33838392/enum-like-arguments-in-r
@@ -136,15 +137,19 @@ usage <- function() {
 #' @examples
 #' init_command_line_parser('MyCheckbook.R','My checkbook program', '1.0.0')
 init_command_line_parser <- function (script, desc, ver = NA) {
+  pkg.globals$initialized <- TRUE
   pkg.globals$script <- script
   pkg.globals$desc_str <- desc
   pkg.globals$ver <- ver
   # tables to hold the possible command line params
-  pkg.globals$args_table <- data.frame(lparam = c(NA,'--help'), sparam = c(NA,'-?'), var = c(NA,'help'),
-                                       default = c(NA,FALSE), argType = c(NA,argsType$TypeBool),
-                                       help = c(NA,"Display help message"), stringsAsFactors = FALSE)
+  pkg.globals$args_table <- data.frame(lparam = NA, sparam = NA, var = NA, default = NA, argType = NA,
+                                       help = NA, stringsAsFactors = FALSE)
   pkg.globals$cmds_table <- data.frame(cmd = NA, help = NA, stringsAsFactors = FALSE)
   pkg.globals$subcmds_table <- data.frame(subcmd = NA, parent = NA, help = NA, stringsAsFactors = FALSE)
+
+  # add a 'help' param
+  reg_argument(lparam = '--help', sparam = '-?', var = 'help', default = FALSE, argType = argsType$TypeBool,
+               help = 'Display help message')
 
 } # init_command_line_parser
 
@@ -160,7 +165,8 @@ init_command_line_parser <- function (script, desc, ver = NA) {
 ##       help: help string for the param, for usage()
 ##
 reg_command <- function(cmd, help = '') {
-  if (is.na(pkg.globals$desc_str)) {
+#  if (is.na(pkg.globals$desc_str)) {
+  if (!pkg.globals$initialized) {
     stop("Error: reg_command(): Command line parser not initialized.", call. = FALSE)
   }
 
@@ -175,24 +181,24 @@ reg_command <- function(cmd, help = '') {
 
 #' Register commands using a list
 #'
-#' @param clist list of commands
+#' @param clist list of lists of commands: command, help string
 #'
 #' @export
 #'
 #' @examples
 #' cmds <- list(
-#'   c("withdraw", "add a withdrawal"),
-#'   c("plot", "graph output"),
-#'   c("deposit", "add a deposit"),
-#'   c("edit", "update a record"),
-#'   c("find", "find a record")
+#'   list("withdraw", "add a withdrawal"),
+#'   list("plot", "graph output"),
+#'   list("deposit", "add a deposit"),
+#'   list("edit", "update a record"),
+#'   list("find", "find a record")
 #' )
 #' reg_command_list(cmds)
 reg_command_list <- function(clist) {
   ids <- c("cmd","help")
   for (c in clist) {
     stopifnot(length(c) == length(ids))
-    reg_command(cmd = c[1], help = c[2])
+    reg_command(cmd = c[[1]], help = c[[2]])
   }
 } # reg_command_list
 
@@ -209,7 +215,8 @@ reg_command_list <- function(clist) {
 ##       help: help string for the param, for usage()
 ##
 reg_subcmd <- function(subcmd = subcmd, parent = parent, help = '') {
-  if (is.na(pkg.globals$desc_str)) {
+#  if (is.na(pkg.globals$desc_str)) {
+  if (!pkg.globals$initialized) {
     stop("Error: reg_subcmd(): Command line parser not initialized.", call. = FALSE)
   }
 
@@ -225,23 +232,23 @@ reg_subcmd <- function(subcmd = subcmd, parent = parent, help = '') {
 
 #' Register subcommands using a list
 #'
-#' @param slist list of subcommands
+#' @param slist list of lists of subcommands: subcmd, parent, help string
 #'
 #' @export
 #'
 #' @examples
 #' subcmds <- list(
-#' c("paycheck", "deposit", "add a paycheck deposit"),
-#' c("reimbursement", "deposit", "add a reimbursement"),
-#' c("bankfee", "withdraw", "add a bank fee"),
-#' c("check", "deposit", "add a check deposit")
+#' list("paycheck", "deposit", "add a paycheck deposit"),
+#' list("reimbursement", "deposit", "add a reimbursement"),
+#' list("bankfee", "withdraw", "add a bank fee"),
+#' list("check", "deposit", "add a check deposit")
 #' )
 #' reg_subcmd_list(subcmds)
 reg_subcmd_list <- function(slist) {
   ids <- c("subcmd","parent","help")
   for (s in slist) {
     stopifnot(length(s) == length(ids))
-    reg_subcmd(subcmd = s[1], parent = s[2], help = s[3])
+    reg_subcmd(subcmd = s[[1]], parent = s[[2]], help = s[[3]])
   }
 } # reg_subcmd_list
 
@@ -264,7 +271,8 @@ reg_subcmd_list <- function(slist) {
 ##                eg, "c("command1|subcmd1", "command2")
 ##
 reg_argument <- function(lparam, sparam, var, default, argType, help) {
-  if (is.na(pkg.globals$desc_str)) {
+  # if (is.na(pkg.globals$desc_str)) {
+  if (!pkg.globals$initialized) {
     stop("Error: reg_argument(): Command line parser not initialized.", call. = FALSE)
   }
 
@@ -272,6 +280,11 @@ reg_argument <- function(lparam, sparam, var, default, argType, help) {
       lparam %in% pkg.globals$args_table$lparam[!is.na(pkg.globals$args_table$lparam)]) {
     stop(paste("Error: reg_argument(): duplicated param:", lparam, sparam), call. = FALSE)
   }
+
+  if (!argType %in% c(argsType$TypeBool, argsType$TypeValue, argsType$TypeMultiVal,
+                      argsType$TypeCount, argsType$TypeRange, argsType$TypePositional))
+    stop(paste("Error: reg_argument(): invalid argType:", argType))
+  if (argType == argsType$TypeBool) default <- as.logical(default)
 
   my_df <- data.frame(lparam = lparam, sparam = sparam, var = var, default = default, argType = argType,
                       help = help, stringsAsFactors = FALSE)
@@ -281,17 +294,17 @@ reg_argument <- function(lparam, sparam, var, default, argType, help) {
 
 #' Register command line arguments
 #'
-#' @param plist list of arguments
+#' @param plist list of lists of arguments: lparam, sparam, var, default, argType, help string
 #'
 #' @export
 #'
 #' @examples
 #' arguments <- list(
-#'   c("--outfile","-o","outfile",NA,argsType$TypeValue,'location of output file'),
-#'   c("--date","-d","date",NA,argsType$TypeValue,'specify date'),
-#'   c("--msg","-m","msg",NA,argsType$TypeValue,'memo line message'),
-#'   c("--amount","-a","amount",NA,argsType$TypeValue,'specify dollar amount'),
-#'   c("--payee","-p","payee",NA,argsType$TypeValue,'specify payee'))
+#'   list("--outfile","-o","outfile",NA,argsType$TypeValue,'location of output file'),
+#'   list("--date","-d","date",NA,argsType$TypeValue,'specify date'),
+#'   list("--msg","-m","msg",NA,argsType$TypeValue,'memo line message'),
+#'   list("--amount","-a","amount",NA,argsType$TypeValue,'specify dollar amount'),
+#'   list("--payee","-p","payee",NA,argsType$TypeValue,'specify payee'))
 #' reg_argument_list(arguments)
 reg_argument_list <- function(plist) {
   # scope is not required. So, check for the 6 required params, and if no scope provided, set to NA
@@ -299,8 +312,8 @@ reg_argument_list <- function(plist) {
 
   for (p in plist) {
     stopifnot (length(p) == length(ids))
-    reg_argument (lparam = p[1], sparam = p[2], var = p[3], default = p[4],
-                  argType = p[5], help = p[6])
+    reg_argument (lparam = p[[1]], sparam = p[[2]], var = p[[3]], default = p[[4]],
+                  argType = p[[5]], help = p[[6]])
   }
 } # reg_argument_list
 
@@ -308,24 +321,28 @@ reg_argument_list <- function(plist) {
 #
 # Register a 'positional' command line argument (ie, the last argument in the list)
 reg_positionals <- function(var, help) {
+  if (!pkg.globals$initialized) {
+    stop("Error: reg_positionals(): Command line parser not initialized.", call. = FALSE)
+  }
+
   reg_argument (lparam = NA, sparam = NA, var = var, default = NA, argType = argsType$TypePositional, help = help)
 } # reg_positionals
 
 
 #' Register a list of 'positional' arguments
 #'
-#' @param plist list of positional arguments: variable name, help text
+#' @param plist list of lists of positional arguments: variable name, help text
 #'
 #' @export
 #'
 #' @examples
-#' args <- list(c("infile","input file"))
+#' args <- list(list("infile","input file"))
 reg_positionals_list <- function(plist) {
   ids <- c("var","help")
 
   for (p in plist) {
     stopifnot(length(p) == length(ids))
-    reg_positionals(var = p[1], help = p[2])
+    reg_positionals(var = p[[1]], help = p[[2]])
   }
 } # reg_positionals_list
 
@@ -403,6 +420,10 @@ parse_date <- function(d) {
 #' # writeLines (paste("infile:", mydata$infile))
 #' # writeLines (paste("outfile:",mydata$outfile))
 parse_command_line <- function(args) {
+  if (!pkg.globals$initialized) {
+    stop("Error: parse_command_line(): Command line parser not initialized.", call. = FALSE)
+  }
+
   # remove the first line of the tables, which are all NA
   args_table <- pkg.globals$args_table[-1,]
   cmds_table <- pkg.globals$cmds_table[-1,]
@@ -413,7 +434,7 @@ parse_command_line <- function(args) {
   # if neither reg_arguments() nor reg_command() has been called, there's no table to process;
   # return the args as a list under the name 'unknowns'
   if (nrow(args_table) == 0 && nrow(cmds_table) == 0) {
-    writeLines ("Warning: new_parse_command_line(): no cmdline params or commands registered.")
+    writeLines ("Warning: parse_command_line(): no cmdline params or commands registered.")
     return (list(unknowns = args))
   }
 
@@ -436,10 +457,10 @@ parse_command_line <- function(args) {
   mydata <- vector("list", nrow(args_table))
   names(mydata) <- args_table$var
   for (name in names(mydata)) {
-    mydata[[name]] <- args_table$default[args_table$var == name]
-    if (args_table$argType[args_table$var == name] == argsType$TypeBool) {
-      mydata[[name]] <- as.logical(mydata[[name]])
-    }
+    myrow <- args_table[args_table$var == name,]
+    mydata[[name]] <- myrow$default
+    # ensure TypeBool is in fact a Bool
+    if (myrow$argType == argsType$TypeBool) mydata[[name]] <- as.logical(mydata[[name]])
   }
 
   # counter
@@ -610,37 +631,12 @@ parse_command_line <- function(args) {
       # ie, if more positionals provided than expected, copy the remainder into the last positional variable
       mydata[[myrow$var]] <- c(mydata[[myrow$var]], positionals[(i+1):length(positionals)])
     }
-    # # if positional arguments are missing...
-    # if (length(index) > length(positionals)) {
-    #   usage()
-    #   writeLines(paste0("parse_command_line(): one or more positional arguments missing"))
-    #   stop(call. = FALSE)
-    # }
-    # else if (length(index) == length(positionals)) {
-    #   for (i in seq_along(index)) {
-    #     myrow <- args_table[index[i],]
-    #     mydata[[myrow$var]] <- positionals[i]
-    #   }
-    # }
-    # else { # there are more positionals provided than required.
-    #   for (i in seq_along(index)) {
-    #     myrow <- args_table[index[i],]
-    #     mydata[[myrow$var]] <- positionals[i]
-    #   }
-    #   # copy the remaining values into the last positional argument
-    #   mydata[[myrow$var]] <- c(mydata[[myrow$var]], positionals[(i+1):length(positionals)])
-    # }
   } # positionals
   return (mydata)
 } # new_parse_command_line
 
 
 # HELPER FUNCTIONS
-remove_dashes <- function(arg) {
-  return (gsub('-', '', arg))
-} # remove_dashes
-
-
 is_lparam <- function(arg) {
   return (grepl('^--', arg))
 } # is_lparam
