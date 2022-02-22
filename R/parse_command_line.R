@@ -434,7 +434,7 @@ parse_command_line <- function(args) {
   # if neither reg_arguments() nor reg_command() has been called, there's no table to process;
   # return the args as a list under the name 'unknowns'
   if (nrow(args_table) == 0 && nrow(cmds_table) == 0) {
-    writeLines ("Warning: parse_command_line(): no cmdline params or commands registered.")
+    warning ("Warning: parse_command_line(): no cmdline params or commands registered.")
     return (list(unknowns = args))
   }
 
@@ -521,7 +521,7 @@ parse_command_line <- function(args) {
         # unrecognized argument
         unk <- unk + 1
         mydata[["unknowns"]][unk] <- p
-        writeLines (paste("Warning: parse_command_line(): unknown param:", p))
+        warning (paste("Warning: parse_command_line(): unknown param:", p))
         i <- i + 1
         next
       }
@@ -532,7 +532,7 @@ parse_command_line <- function(args) {
         # unrecognized argument
         unk <- unk + 1
         mydata[["unknowns"]][unk] <- p
-        writeLines (paste("Warning: parse_command_line(): unknown param:", p))
+        warning (paste("Warning: parse_command_line(): unknown param:", p))
         i <- i + 1
         next
       }
@@ -545,7 +545,7 @@ parse_command_line <- function(args) {
         # unrecognized argument
         unk <- unk + 1
         mydata[["unknowns"]][unk] <- p
-        writeLines (paste("Warning: parse_command_line(): unknown param:", p))
+        warning (paste("Warning: parse_command_line(): unknown param:", p))
       }
       i <- i + 1
       next
@@ -554,7 +554,7 @@ parse_command_line <- function(args) {
       # unrecognized argument
       unk <- unk + 1
       mydata[["unknowns"]][unk] <- p
-      writeLines (paste("Warning: parse_command_line(): unknown param:", p))
+      warning (paste("Warning: parse_command_line(): unknown param:", p))
       i <- i + 1
       next
     }
@@ -565,7 +565,7 @@ parse_command_line <- function(args) {
       if (has_equals) {
         val <- strsplit(p, "=")[[1]][2]
         if (!is.na(as.logical(val))) mydata[[myrow$var]] <- as.logical(val)
-        else writeLines(paste("Warning: parse_command_line(): non-Boolean value provided to Boolean argument ignored:", p))
+        else warning(paste("Warning: parse_command_line(): non-Boolean value provided to Boolean argument ignored:", p))
       }
       else mydata[[myrow$var]] <- !as.logical(myrow$default)
     }
