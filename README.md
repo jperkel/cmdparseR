@@ -143,7 +143,7 @@ $unknowns
 
 ```
 
-`cmdparseR` provides a `usage()` function to create a formatted help message based on the `desc` strings passed to `reg_argument_list()`, `reg_command_list()` and `reg_subcmd_list()`. By default, `--help` or `-?` on the command line will call this function:
+`cmdparseR` provides a `usage()` function to create a formatted help message based on the `desc` strings passed to `reg_argument_list()`, `reg_command_list()` and `reg_subcmd_list()`. By default, `--help` or `-?` on the command line will call this function, but you can override that behavior by setting the `default_help` argument to `parse_command_line()` to FALSE to provide, for instance, subcommand-specific help:
 
 ```
 $ Rscript test_cmdparseR.R -?

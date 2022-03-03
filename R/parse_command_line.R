@@ -407,6 +407,7 @@ parse_date <- function(d) {
 #' Parse the command line
 #'
 #' @param args command line arguments
+#' @param default_help use built-in help generation (set to FALSE to provide eg subcmd-specific help)
 #'
 #' @return a list of parsed data
 #' @export
@@ -419,7 +420,7 @@ parse_date <- function(d) {
 #' # writeLines (paste("subcommand:",mydata$subcmd))
 #' # writeLines (paste("infile:", mydata$infile))
 #' # writeLines (paste("outfile:",mydata$outfile))
-parse_command_line <- function(args) {
+parse_command_line <- function(args, default_help=TRUE) {
   if (!pkg.globals$initialized) {
     stop("Error: parse_command_line(): Command line parser not initialized.", call. = FALSE)
   }
@@ -438,7 +439,9 @@ parse_command_line <- function(args) {
     return (list(unknowns = args))
   }
 
-  if (any(args %in% c("--help", "-?"))) {
+  # if default_help is TRUE, show default usage() if --help or -? anywhere in the cmdline
+  # if not, we can catch --help/-? lower down and return by setting mydata$help to TRUE
+  if (default_help && any(args %in% c("--help", "-?"))) {
     usage()
     stop(call. = FALSE)
   }
@@ -474,11 +477,14 @@ parse_command_line <- function(args) {
       # filter subcmds_table to include only entries where parent == command
       subcmds_table <- subcmds_table[subcmds_table$parent == mydata$command,]
     }
-
+    else if (args[i] %in% c("--help","-?")) {
+      mydata[["help"]] <- TRUE
+      return (mydata)
+    }
     else if (is.na(args[i])) {
+      usage()
       stop("parse_command_line(): command required", call. = FALSE)
     }
-
     else {
       stop (paste("parse_command_line(): unknown command:", args[i]), call. = FALSE)
     }
@@ -489,6 +495,10 @@ parse_command_line <- function(args) {
   if (nrow(subcmds_table) > 0) {
     if (args[i] %in% subcmds_table$subcmd) {
       mydata[["subcmd"]] <- args[i]
+    }
+    else if (args[i] %in% c("--help","-?")) {
+      mydata[["help"]] <- TRUE
+      return (mydata)
     }
     else if (is.na(args[i])) {
       stop("parse_command_line(): subcommand required", call. = FALSE)
@@ -507,7 +517,6 @@ parse_command_line <- function(args) {
     myrow <- NULL
     index <- NULL
     has_equals <- FALSE
-    # print(paste(i, p))
 
     if (is_lparam(p)) {
       if (p %in% args_table$lparam) {
@@ -642,9 +651,9 @@ is_lparam <- function(arg) {
 } # is_lparam
 
 is_sparam <- function(arg) {
-  return(grepl('^-[a-zA-Z]{1}', arg))
+  return(grepl('^-[a-zA-Z?]{1}$', arg))
 }
 
 is_concatenated_sparam <- function(arg) {
-  return(grepl('^-[a-zA-Z]{2,}', arg))
+  return(grepl('^-[a-zA-Z?]{2,}$', arg))
 }

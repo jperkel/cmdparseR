@@ -4,10 +4,12 @@
 \alias{parse_command_line}
 \title{Parse the command line}
 \usage{
-parse_command_line(args)
+parse_command_line(args, default_help = TRUE)
 }
 \arguments{
 \item{args}{command line arguments}
+
+\item{default_help}{use built-in help generation (set to FALSE to provide eg subcmd-specific help)}
 }
 \value{
 a list of parsed data

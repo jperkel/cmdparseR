@@ -34,8 +34,14 @@ main <- function() {
   reg_positionals_list(pos)
 
   args <- commandArgs(trailingOnly = TRUE)
-  mydata <- parse_command_line(args)
+  mydata <- parse_command_line(args, default_help = FALSE)
 
+  if (mydata$help) {
+    writeLines(paste0("Command: ", mydata$command))
+    writeLines(paste0("Subcmd: ", mydata$subcmd))
+    usage()
+    stop(call. = FALSE)
+  }
   if (is.na(mydata$outfile)) stop("Error: no outfile provided.")
   # read input from stdin if no input files provided on the cmd line.
   if (is.na(mydata$infiles[1])) {
