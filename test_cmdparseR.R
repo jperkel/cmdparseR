@@ -54,4 +54,4 @@ main <- function() {
   print(mydata)
 }
 
-main()
+if (!interactive()) main()
