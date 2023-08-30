@@ -148,8 +148,12 @@ init_command_line_parser <- function (script, desc, ver = NA) {
   pkg.globals$subcmds_table <- data.frame(subcmd = NA, parent = NA, help = NA, stringsAsFactors = FALSE)
 
   # add a 'help' param
-  reg_argument(lparam = '--help', sparam = '-?', var = 'help', default = FALSE, argType = argsType$TypeBool,
+  reg_argument(lparam = '--help', sparam = '-h', var = 'help', default = FALSE, argType = argsType$TypeBool,
                help = 'Display help message')
+
+  # add a 'version' param
+  reg_argument(lparam = '--ver', sparam = '-V', var = 'ver', default = FALSE, argType = argsType$TypeBool,
+               help = "Display version information")
 
 } # init_command_line_parser
 
@@ -423,6 +427,16 @@ parse_date <- function(d) {
 parse_command_line <- function(args, default_help=TRUE) {
   if (!pkg.globals$initialized) {
     stop("Error: parse_command_line(): Command line parser not initialized.", call. = FALSE)
+  }
+
+  if(any(args %in% c('--help', '-h'))) {
+    usage()
+    stop(call. = FALSE)
+  }
+
+  if(any(args %in% c('--ver', '-V'))) {
+    writeLines(paste0(pkg.globals$script, ': ', pkg.globals$desc_str, '\n\tVer: ', pkg.globals$ver, '\n'))
+    stop(call. = FALSE)
   }
 
   # remove the first line of the tables, which are all NA
