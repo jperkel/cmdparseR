@@ -152,7 +152,7 @@ init_command_line_parser <- function (script, desc, ver = NA) {
                help = 'Display help message')
 
   # add a 'version' param
-  reg_argument(lparam = '--ver', sparam = '-V', var = 'ver', default = FALSE, argType = argsType$TypeBool,
+  reg_argument(lparam = '--ver', sparam = '-V', var = 'ver', default = pkg.globals$ver, argType = argsType$TypeValue,
                help = "Display version information")
 
 } # init_command_line_parser
