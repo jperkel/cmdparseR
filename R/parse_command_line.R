@@ -429,11 +429,6 @@ parse_command_line <- function(args, default_help=TRUE) {
     stop("Error: parse_command_line(): Command line parser not initialized.", call. = FALSE)
   }
 
-  if(any(args %in% c('--help', '-h'))) {
-    usage()
-    stop(call. = FALSE)
-  }
-
   if(any(args %in% c('--ver', '-V'))) {
     writeLines(paste0(pkg.globals$script, ': ', pkg.globals$desc_str, '\n\tVer: ', pkg.globals$ver, '\n'))
     stop(call. = FALSE)
@@ -455,7 +450,7 @@ parse_command_line <- function(args, default_help=TRUE) {
 
   # if default_help is TRUE, show default usage() if --help or -? anywhere in the cmdline
   # if not, we can catch --help/-? lower down and return by setting mydata$help to TRUE
-  if (default_help && any(args %in% c("--help", "-?"))) {
+  if (default_help && any(args %in% c("--help", "-h"))) {
     usage()
     stop(call. = FALSE)
   }
