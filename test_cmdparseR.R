@@ -1,4 +1,4 @@
-library(cmdparseR)
+# library(cmdparseR)
 
 main <- function() {
   init_command_line_parser('test_cmdparseR','Test cmdparseR package','0.1.0')
@@ -22,6 +22,8 @@ main <- function() {
     list('--debug','-d','debug',FALSE,argsType$TypeBool,'Display debug messages'),
     list('--keywords','-k','keywords',NA,argsType$TypeMultiVal,'Search keywords'),
     list('--daterange','-r','daterange',NA,argsType$TypeRange,'Date range'),
+    list('--long-help-text',NA,'longhelptext',NA,argsType$TypeBool,
+         'The unanimous Declaration of the thirteen united States of America, When in the Course of human events, it becomes necessary for one people to dissolve the political bands which have connected them with another, and to assume among the powers of the earth, the separate and equal station to which the Laws of Nature and of Natures God entitle them, a decent respect to the opinions of mankind requires that they should declare the causes which impel them to the separation.'),
     list('--username','-u','username',NA,argsType$TypeValue,'User name'),
     list('--verbose','-v','verbose',0,argsType$TypeCount,'Verbosity level')
   )

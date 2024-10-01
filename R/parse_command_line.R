@@ -107,21 +107,54 @@ usage <- function() {
   writeLines(paste0(buffer_str(lvl1_indent), 'OPTIONAL ARGUMENTS:'))
   for (r in 1:nrow(args_table)) {
     myrow <- args_table[r,]
-    writeLines(paste0(
+    outstr <- paste0(
       buffer_str(lvl2_indent),stringr::str_pad(myrow$lparam, max(nchar(args_table$lparam)), "right"),
       # need 5 spaces to account for sparam if none provided, eg ' (-m)'
       ifelse (!is.na(myrow$sparam), paste0(' (', myrow$sparam, ')'), buffer_str(5)),
-      ifelse (myrow$help == '', '', ': '),
-      myrow$help,
-      ifelse(is.na(myrow$default), '',
-             paste0('\n', buffer_str(lvl2_indent + max(nchar(args_table$lparam)) + 10),
-                    'default: ',
-                    ifelse (myrow$argType == argsType$TypeBool, as.logical(myrow$default), myrow$default))
-      ) #,
-      # ifelse(is.na(myrow$scope), '',
-      #        paste0('\n', buffer_str(lvl2_indent + max(nchar(args_table$lparam)) + 10),
-      #               "Valid for: ", gsub('_', ', ', myrow$scope)))
-    ))
+      ifelse (myrow$help == '', '', ': '))
+
+    if (nchar(outstr) + nchar(myrow$help) > 80) {
+      help_pos <- nchar(outstr)
+      maxhelplinelen <- 80 - help_pos
+      nhelplines <- (nchar(myrow$help) / maxhelplinelen) + 1
+      helpbuf <- paste0(rep(' ', help_pos), collapse = '')
+      helpline <- NULL
+      for (i in 1:nhelplines) {
+        start <- ((i - 1) * maxhelplinelen) + 1
+        stop <- start + maxhelplinelen - 1
+        t <- substr(myrow$help, start, stop)
+        if (i > 1) t <- paste0(helpbuf, t)
+        helpline <- c(helpline, t)
+      }
+      helpline <- paste0(helpline, collapse = '\n')
+    }
+    else {
+      helpline <- myrow$help
+    }
+
+    writeLines(paste0(outstr,
+                      helpline,
+                      ifelse(is.na(myrow$default), '',
+                             paste0('\n', buffer_str(lvl2_indent + max(nchar(args_table$lparam)) + 10),
+                                    'default: ',
+                                    ifelse (myrow$argType == argsType$TypeBool, as.logical(myrow$default), myrow$default))
+                      ))) #,
+
+    # writeLines(paste0(
+    #   buffer_str(lvl2_indent),stringr::str_pad(myrow$lparam, max(nchar(args_table$lparam)), "right"),
+    #   # need 5 spaces to account for sparam if none provided, eg ' (-m)'
+    #   ifelse (!is.na(myrow$sparam), paste0(' (', myrow$sparam, ')'), buffer_str(5)),
+    #   ifelse (myrow$help == '', '', ': '),
+    #   myrow$help,
+    #   ifelse(is.na(myrow$default), '',
+    #          paste0('\n', buffer_str(lvl2_indent + max(nchar(args_table$lparam)) + 10),
+    #                 'default: ',
+    #                 ifelse (myrow$argType == argsType$TypeBool, as.logical(myrow$default), myrow$default))
+    #   ) #,
+    # ifelse(is.na(myrow$scope), '',
+    #        paste0('\n', buffer_str(lvl2_indent + max(nchar(args_table$lparam)) + 10),
+    #               "Valid for: ", gsub('_', ', ', myrow$scope)))
+    # ))
   }
 } # usage
 
@@ -152,7 +185,7 @@ init_command_line_parser <- function (script, desc, ver = NA) {
                help = 'Display help message')
 
   # add a 'version' param
-  reg_argument(lparam = '--ver', sparam = '-V', var = 'ver', default = pkg.globals$ver, argType = argsType$TypeValue,
+  reg_argument(lparam = '--ver', sparam = '-V', var = 'ver', default = NA, argType = argsType$TypeValue,
                help = "Display version information")
 
 } # init_command_line_parser
