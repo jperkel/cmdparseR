@@ -30,7 +30,7 @@ main <- function() {
   reg_argument_list(args)
 
   pos <- list(
-    list('outfile','Output filename'),
+    list('outfile','Output filename.'),
     list('infiles','Input filename(s)')
   )
   reg_positionals_list(pos)

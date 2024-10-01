@@ -101,21 +101,58 @@ usage <- function() {
 
       if (nchar(outstr) + nchar(helptext) > 80) {
         formatted_help <- NULL
-        help_pos <- nchar(outstr)
-        helpbuf <- paste0(rep(' ', help_pos), collapse = '')
-        maxhelplinelen <- 80 - help_pos
-        nhelplines <- (nchar(helptext) %/% maxhelplinelen)
-        if (nchar(helptext) %% maxhelplinelen) nhelplines <- nhelplines + 1
+        help_Lpos <- nchar(outstr)
+        help_Lbuf <- paste0(rep(' ', help_Lpos), collapse = '')
+        maxhelpline <- 80 - help_Lpos
 
-        for (i in 1:nhelplines) {
-          start <- ((i - 1) * maxhelplinelen) + 1
-          stop <- i * maxhelplinelen
+        start <- 1
+        stop <- maxhelpline
+        while (stop <= nchar(helptext)) {
           t <- substr(helptext, start, stop)
-          if (i > 1) t <- paste0(helpbuf, t)
+          if (grepl(pattern = '[a-zA-Z0-9]', x = stringr::str_sub(t, -1)) & stop != nchar(helptext)) {
+            l <- stringr::str_locate(string = t, pattern = '([:space:]|[:punct:]|\\|)[a-zA-Z0-9]+$')
+            if (!is.na(l[1])) {
+              stop <- l[1] + start - 1
+              t <- substr(helptext, start, stop)
+            }
+          }
+          t <- trimws(t)
+          # add help_Lbuf for lines 2+
+          if (start > 1) t <- paste0(help_Lbuf, t)
+
           formatted_help <- c(formatted_help, t)
+          start <- stop + 1
+          if (start > nchar(helptext)) break
+          stop <- min((start + maxhelpline) - 1, nchar(helptext))
         }
         formatted_help <- paste0(formatted_help, collapse = '\n')
       }
+
+      # if (nchar(outstr) + nchar(helptext) > 80) {
+      #   formatted_help <- NULL
+      #   help_Lpos <- nchar(outstr)
+      #   help_Lbuf <- paste0(rep(' ', help_Lpos), collapse = '')
+      #   maxhelpline <- 80 - help_Lpos
+      #
+      #   start <- 1
+      #   stop <- maxhelpline
+      #   while (stop <= nchar(helptext)) {
+      #     t <- substr(helptext, start, stop)
+      #     if (grepl(pattern = '[a-zA-Z0-9]', x = stringr::str_sub(t, -1))) {
+      #       stop <- stringr::str_locate(string = t, pattern = '[:space:][a-zA-Z0-9]+$')[1] + start - 1
+      #       t <- substr(helptext, start, stop)
+      #     }
+      #     t <- trimws(t)
+      #     # add help_Lbuf for lines 2+
+      #     if (start > 1) t <- paste0(help_Lbuf, t)
+      #
+      #     formatted_help <- c(formatted_help, t)
+      #     start <- stop + 1
+      #     if (start > nchar(helptext)) break
+      #     stop <- min((start + maxhelpline) - 1, nchar(helptext))
+      #   }
+      #   formatted_help <- paste0(formatted_help, collapse = '\n')
+      # }
       else {
         formatted_help <- helptext
       }
@@ -135,26 +172,38 @@ usage <- function() {
       # need 5 spaces to account for sparam if none provided, eg ' (-m)'
       ifelse (!is.na(myrow$sparam), paste0(' (', myrow$sparam, ')'), buffer_str(5)),
       ifelse (myrow$help == '', '', ': '))
+    helptext <- myrow$help
 
-    if (nchar(outstr) + nchar(myrow$help) > 80) {
+    if (nchar(outstr) + nchar(helptext) > 80) {
       formatted_help <- NULL
-      help_pos <- nchar(outstr)
-      helpbuf <- paste0(rep(' ', help_pos), collapse = '')
-      maxhelplinelen <- 80 - help_pos
-      nhelplines <- (nchar(myrow$help) %/% maxhelplinelen)
-      if (nchar(myrow$help) %% maxhelplinelen) nhelplines <- nhelplines + 1
+      help_Lpos <- nchar(outstr)
+      help_Lbuf <- paste0(rep(' ', help_Lpos), collapse = '')
+      maxhelpline <- 80 - help_Lpos
 
-      for (i in 1:nhelplines) {
-        start <- ((i - 1) * maxhelplinelen) + 1
-        stop <- i * maxhelplinelen
-        t <- substr(myrow$help, start, stop)
-        if (i > 1) t <- paste0(helpbuf, t)
+      start <- 1
+      stop <- maxhelpline
+      while (stop <= nchar(helptext)) {
+        t <- substr(helptext, start, stop)
+        if (grepl(pattern = '[a-zA-Z0-9]', x = stringr::str_sub(t, -1)) & stop != nchar(helptext)) {
+          l <- stringr::str_locate(string = t, pattern = '([:space:]|[:punct:]|\\|)[a-zA-Z0-9]+$')
+          if (!is.na(l[1])) {
+            stop <- l[1] + start - 1
+            t <- substr(helptext, start, stop)
+          }
+        }
+        t <- trimws(t)
+        # add help_Lbuf for lines 2+
+        if (start > 1) t <- paste0(help_Lbuf, t)
+
         formatted_help <- c(formatted_help, t)
+        start <- stop + 1
+        if (start > nchar(helptext)) break
+        stop <- min((start + maxhelpline) - 1, nchar(helptext))
       }
       formatted_help <- paste0(formatted_help, collapse = '\n')
     }
     else {
-      formatted_help <- myrow$help
+      formatted_help <- helptext
     }
 
     writeLines(paste0(outstr,
