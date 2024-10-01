@@ -95,8 +95,31 @@ usage <- function() {
   if (!is.null(positionals[1])) {
     writeLines(paste0(buffer_str(lvl1_indent), "REQUIRED ARGUMENTS: "))
     for (p in positionals) {
-      writeLines(paste0(buffer_str(lvl2_indent),stringr::str_pad(p, max(nchar(args_table$lparam), na.rm = TRUE), "right"),
-                        buffer_str(5), ": ", args_table$help[args_table$var == p]))
+      outstr <- paste0(buffer_str(lvl2_indent),stringr::str_pad(p, max(nchar(args_table$lparam), na.rm = TRUE), "right"),
+                       buffer_str(5), ": ")
+      helptext <- args_table$help[args_table$var == p]
+
+      if (nchar(outstr) + nchar(helptext) > 80) {
+        formatted_help <- NULL
+        help_pos <- nchar(outstr)
+        helpbuf <- paste0(rep(' ', help_pos), collapse = '')
+        maxhelplinelen <- 80 - help_pos
+        nhelplines <- (nchar(helptext) %/% maxhelplinelen)
+        if (nchar(helptext) %% maxhelplinelen) nhelplines <- nhelplines + 1
+
+        for (i in 1:nhelplines) {
+          start <- ((i - 1) * maxhelplinelen) + 1
+          stop <- i * maxhelplinelen
+          t <- substr(helptext, start, stop)
+          if (i > 1) t <- paste0(helpbuf, t)
+          formatted_help <- c(formatted_help, t)
+        }
+        formatted_help <- paste0(formatted_help, collapse = '\n')
+      }
+      else {
+        formatted_help <- helptext
+      }
+     writeLines(paste0(outstr, formatted_help))
     }
   }
 
@@ -114,26 +137,28 @@ usage <- function() {
       ifelse (myrow$help == '', '', ': '))
 
     if (nchar(outstr) + nchar(myrow$help) > 80) {
+      formatted_help <- NULL
       help_pos <- nchar(outstr)
-      maxhelplinelen <- 80 - help_pos
-      nhelplines <- (nchar(myrow$help) / maxhelplinelen) + 1
       helpbuf <- paste0(rep(' ', help_pos), collapse = '')
-      helpline <- NULL
+      maxhelplinelen <- 80 - help_pos
+      nhelplines <- (nchar(myrow$help) %/% maxhelplinelen)
+      if (nchar(myrow$help) %% maxhelplinelen) nhelplines <- nhelplines + 1
+
       for (i in 1:nhelplines) {
         start <- ((i - 1) * maxhelplinelen) + 1
-        stop <- start + maxhelplinelen - 1
+        stop <- i * maxhelplinelen
         t <- substr(myrow$help, start, stop)
         if (i > 1) t <- paste0(helpbuf, t)
-        helpline <- c(helpline, t)
+        formatted_help <- c(formatted_help, t)
       }
-      helpline <- paste0(helpline, collapse = '\n')
+      formatted_help <- paste0(formatted_help, collapse = '\n')
     }
     else {
-      helpline <- myrow$help
+      formatted_help <- myrow$help
     }
 
     writeLines(paste0(outstr,
-                      helpline,
+                      formatted_help,
                       ifelse(is.na(myrow$default), '',
                              paste0('\n', buffer_str(lvl2_indent + max(nchar(args_table$lparam)) + 10),
                                     'default: ',
